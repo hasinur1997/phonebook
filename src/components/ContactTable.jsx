@@ -28,7 +28,7 @@ const ContactTable = ({
       title: 'Actions',
       key: 'actions',
       render: (_, record) => (
-        <ContactActions record={record} onView={onView} onEdit={onEdit} onDelete={onDelete} />
+        <ContactActions record={record} onView={onView} onEdit={onEdit} onDelete={() => onDelete(record.id)} />
       ),
     },
   ];

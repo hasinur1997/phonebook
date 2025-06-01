@@ -45,23 +45,55 @@ const ContactList = () => {
     setDrawerVisible(true);
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     if (editingContactKey) {
-      setContacts((prev) =>
-        prev.map((c) => (c.id === editingContactKey ? { ...c, ...values } : c))
-      );
-      message.success('Contact updated successfully');
+        updateContact(values);
     } else {
-      const newId = (contacts.length + 1).toString();
-      setContacts((prev) => [...prev, { id: newId, ...values }]);
-      message.success('Contact created successfully');
+      createContact(values)
     }
     setDrawerVisible(false);
   };
 
+  const updateContact = async (data) => {
+    setLoading(true);
+    try {
+      const res = await contactApi.update(editingContactKey, data);
+      setContacts((prev) =>
+        prev.map((c) => (c.id === editingContactKey ? { ...c, ...res.data } : c))
+      );
+    } catch(error) {
+      message.error('Failed to update contact');
+    }finally {
+      
+      message.success('Contact updated successfully');
+      setLoading(false);
+    }
+  }
+
+  const createContact = async (data) => {
+    setLoading(true);
+    try {
+      const res = await contactApi.create(data);
+      setContacts((prev) => [...prev, { id: res.data.id, ...data }]);
+    } catch(error) {
+      message.error('Failed to create contact');
+    }finally {
+      message.success('Contact created successfully');
+      setLoading(false);
+    }
+  }
+
   const handleDelete = (id) => {
-    setContacts((prev) => prev.filter((c) => c.id !== id));
-    message.success('Contact deleted');
+    setLoading(true);
+    try {
+      const res = contactApi.delete(id);
+    } catch(error) {
+      message.error('Failed to create contact');
+    }finally {
+      setContacts((prev) => prev.filter((c) => c.id !== id));
+      message.success('Contact deleted');
+      setLoading(false);
+    }
   };
 
   const handleView = (contact) => {
@@ -73,7 +105,6 @@ const ContactList = () => {
     setViewModalVisible(false);
     setSelectedContact(null);
   };
-
 
   useEffect(() => {
     const fetchContacts = async () => {
