@@ -1,6 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
 
-const BASE = '/wp-json/myplugin/v1/contacts';
+const BASE = '/phonebook/v1/contacts';
 
 /**
  * ContactApi class to handle CRUD operations for contacts.

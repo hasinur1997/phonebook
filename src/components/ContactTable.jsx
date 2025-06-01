@@ -17,12 +17,13 @@ const ContactTable = ({
   setPagination,
   sorter,
   setSorter,
+  total
 }) => {
   const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    { title: 'Email', dataIndex: 'email', key: 'email', render: (emails) => emails?.[0] },
-    { title: 'Phone', dataIndex: 'phone', key: 'phone', render: (phones) => phones?.[0] },
-    { title: 'Type', dataIndex: 'type', key: 'type' },
+    { title: 'Name', dataIndex: 'name', key: 'name', sorter: true },
+    { title: 'Email', dataIndex: 'email', key: 'email', render: (emails) => emails?.[0], sorter: true },
+    { title: 'Phone', dataIndex: 'phone', key: 'phone', render: (phones) => phones?.[0], sorter: true },
+    { title: 'Type', dataIndex: 'type', key: 'type', sorter: true },
     {
       title: 'Actions',
       key: 'actions',
@@ -78,10 +79,10 @@ const ContactTable = ({
 
       <Table
         columns={columns}
-        dataSource={paginatedContacts}
+        dataSource={contacts}
         pagination={{
           ...pagination,
-          total: sortedContacts.length, // Needed for proper page count
+          total: total, // Needed for proper page count
         }}
         onChange={(pag, filters, sort) => {
           setPagination({
@@ -92,6 +93,7 @@ const ContactTable = ({
           setSorter(sort);
         }}
         rowClassName={() => 'cursor-pointer'}
+        rowKey="id"
       />
     </>
   );

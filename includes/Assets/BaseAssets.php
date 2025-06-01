@@ -106,7 +106,7 @@ abstract class BaseAssets implements HookableInterface {
      */
     private function get_version( $file_name ) {
         $assets      = $this->get_file_assets( $file_name );
-        $assets_vers = ! empty( $assets['version'] ) ? $assets['version'] : hub_order()->version;
+        $assets_vers = ! empty( $assets['version'] ) ? $assets['version'] : phonebook()->version;
         return $assets_vers;
     }
 

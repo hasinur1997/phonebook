@@ -6,12 +6,12 @@ import ContactLayout from './ContactLayout';
 import ContactTable from './ContactTable';
 import ContactDrawerForm from './ContactDrawerForm';
 import ContactViewModal from './ContactViewModal';
-import data from '../data.json';
+import contactApi from '../api/contactApi'; // Adjust the import path as necessary
 
 const { Header, Sider, Content } = Layout;
 
 const ContactList = () => {
-  const [contacts, setContacts] = useState(data);
+  const [contacts, setContacts] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [editingContactKey, setEditingContactKey] = useState(null);
@@ -22,8 +22,12 @@ const ContactList = () => {
     current: 1,
     pageSize: 10,
     showSizeChanger: true,
-    pageSizeOptions: ['5', '10', '20', '50'],
+    pageSizeOptions: ['1', '2', '5', '10', '20', '50'],
   });
+
+  const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+
 
   const [sorter, setSorter] = useState({});
 
@@ -37,26 +41,26 @@ const ContactList = () => {
 
   const openEditDrawer = (contact) => {
     form.setFieldsValue(contact);
-    setEditingContactKey(contact.key);
+    setEditingContactKey(contact.id);
     setDrawerVisible(true);
   };
 
   const handleSubmit = (values) => {
     if (editingContactKey) {
       setContacts((prev) =>
-        prev.map((c) => (c.key === editingContactKey ? { ...c, ...values } : c))
+        prev.map((c) => (c.id === editingContactKey ? { ...c, ...values } : c))
       );
       message.success('Contact updated successfully');
     } else {
-      const newKey = (contacts.length + 1).toString();
-      setContacts((prev) => [...prev, { key: newKey, ...values }]);
+      const newId = (contacts.length + 1).toString();
+      setContacts((prev) => [...prev, { id: newId, ...values }]);
       message.success('Contact created successfully');
     }
     setDrawerVisible(false);
   };
 
-  const handleDelete = (key) => {
-    setContacts((prev) => prev.filter((c) => c.key !== key));
+  const handleDelete = (id) => {
+    setContacts((prev) => prev.filter((c) => c.id !== id));
     message.success('Contact deleted');
   };
 
@@ -69,6 +73,34 @@ const ContactList = () => {
     setViewModalVisible(false);
     setSelectedContact(null);
   };
+
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      setLoading(true);
+      try {
+        const response = await contactApi.all({
+          page: pagination.current,
+          per_page: pagination.pageSize,
+          search: searchText,
+          orderby: sorter.field,
+          order: sorter.order === 'ascend' ? 'asc' : 'desc',
+          filter: typeFilter,
+        });
+
+        // console.log('Fetched contacts:', response); // Debugging log
+        setContacts(response.data); // If your API wraps response in `data`
+        setTotal(response.total);   // Make sure your API sends this
+      } catch (error) {
+        message.error('Failed to fetch contacts');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, [pagination, sorter, searchText, typeFilter]);
+
 
   return (
     <ContactLayout>
@@ -94,6 +126,7 @@ const ContactList = () => {
         setPagination={setPagination}
         sorter={sorter}
         setSorter={setSorter}
+        total={total}
       />
 
       <ContactDrawerForm

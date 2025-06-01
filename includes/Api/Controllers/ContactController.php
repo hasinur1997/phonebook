@@ -132,11 +132,43 @@ class ContactController extends BaseController {
      * @return WP_HTTP_Response
      */
     public function get_items( $request ) {
-        $per_page = ! empty( $request['per_page'] ) ? intval( $request['per_page'] ) : 10;
-        $paged    = ! empty( $request['paged'] ) ? intval( $request['paged'] ) : 1;
+        $per_page   = !empty($request['per_page']) ? intval($request['per_page']) : 10;
+        $page       = !empty($request['page']) ? intval($request['page']) : 1;
+        $search     = !empty($request['search']) ? sanitize_text_field($request['search']) : '';
+        $sortBy     = !empty($request['orderby']) ? sanitize_text_field($request['orderby']) : 'id';
+        $sortOrder  = !empty($request['order']) ? sanitize_text_field($request['order']) : 'asc';
+        $filter     = !empty($request['filter']) ? $request['filter'] : null;
 
+        $query = Contact::query();
 
-        return ContactResource::Collection(Contact::all());
+        if ( ! empty( $search ) ) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%")
+                    ->orWhere('company', 'like', "%{$search}%")
+                    ->orWhere('job_title', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter
+        if ( ! empty( $filter ) && is_string( $filter ) ) {
+            $query->where( 'type', $filter );
+        }
+
+        // Sort
+        $allowedSorts = ['id', 'name', 'created_at'];
+        $sortBy       = in_array($sortBy, $allowedSorts) ? $sortBy : 'id';
+        $sortOrder    = strtolower($sortOrder) === 'desc' ? 'desc' : 'asc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Paginate
+        $contacts = $query->paginate( $per_page, ['*'], 'page', $page );
+
+        // Return
+        return rest_ensure_response( $contacts );
     }
 
     /**

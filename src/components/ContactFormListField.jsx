@@ -20,7 +20,7 @@ const ContactFormListField = ({ name, label, placeholder, type = 'text' }) => (
       <>
         <label>{label}</label>
         {fields.map((field, index) => (
-          console.log(name),
+          console.log(field, index),
           <Form.Item
             key={field.key}
             required={index === 0}
