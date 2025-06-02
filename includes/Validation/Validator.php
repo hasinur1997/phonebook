@@ -127,7 +127,11 @@ class Validator {
      */
     protected function validateMin( string $field, $value, $param = null ): void {
         if ( is_string( $value ) && strlen( $value ) < (int)$param) {
-            $this->errors[$field][] = sprintf(__('The :attribute must be at least %d characters.', 'phonebook'), $param);
+            $this->errors[$field][] = sprintf(
+                /* translators: %d: Minimum number of characters required. */
+                __('The :attribute must be at least %d characters.', 'phonebook'),
+                $param
+            );
         }
     }
 
@@ -141,6 +145,7 @@ class Validator {
      */
     protected function validateMax(string $field, $value, $param): void {
         if ( is_string($value) && strlen($value) > (int)$param ) {
+            /* translators: %d: Maximum number of characters allowed. */
             $this->errors[$field][] = sprintf(__('The :attribute must not exceed %d characters.', 'phonebook'), $param);
         }
     }
@@ -156,6 +161,7 @@ class Validator {
     protected function validateIn(string $field, $value, $param): void {
         $allowed = explode(',', $param);
         if ( ! in_array($value, $allowed)) {
+            /* translators: %s: Allowed values. */
             $this->errors[$field][] = sprintf(__('The :attribute must be one of: %s.', 'phonebook'), implode(', ', $allowed));
         }
     }
