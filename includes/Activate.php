@@ -14,6 +14,6 @@ class Activate {
      * @return void
      */
     public static function handle(): void {
-        // todo: add activation logic
+        Install::run();
     }
 }
